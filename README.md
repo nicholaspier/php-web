@@ -8,8 +8,19 @@ The database is part of a separate image detailed below.
 
 ### Example run. 
 
-```
-docker run -dit -p 8080:80 -e APP_DB_SRV="k8s-m1.pier.lan" -e APP_DB_USER="sakila" -e APP_DB_PASS="sakila" -e APP_DB_NAME="sakila" --name php-web  pier/php-web
+```sh
+DB_HOST=<IP or Hostname>
+DB_USER=sakila
+DB_PASS=sakila
+DB_NAME=sakila
+
+docker run -dit -p 8080:80 \
+  -e APP_DB_SRV="${DB_HOST}" \
+  -e APP_DB_USER="${DB_USER}" \
+  -e APP_DB_PASS="${DB_PASS}" \
+  -e APP_DB_NAME="${DB_NAME}" \
+  --name php-web \
+  pier/php-web
 ```
 
 ### Variables
@@ -23,8 +34,20 @@ docker run -dit -p 8080:80 -e APP_DB_SRV="k8s-m1.pier.lan" -e APP_DB_USER="sakil
 This isn't a custom image. Instead, we leverage the public mariadb image and pass it variables for initial configuration. 
 
 You can run the database with the following example run command:
-```
-docker run -dit --name php-db -p 3306:3306 -v /root/php-web/db-data/:/var/lib/mysql -v /root/php-web/schema:/docker-entrypoint-initdb.d  -e MYSQL_RANDOM_ROOT_PASSWORD=yes -e MYSQL_DATABASE=sakila -e MYSQL_USER=sakila -e MYSQL_PASSWORD=sakila -d mariadb:latest
+```sh
+DB_USER=sakila
+DB_PASS=sakila
+DB_NAME=sakila
+
+docker run -dit --name php-db \
+  -p 3306:3306 \
+  -v ${PWD}/db-data/:/var/lib/mysql \
+  -v ${PWD}/schema:/docker-entrypoint-initdb.d  \
+  -e MYSQL_RANDOM_ROOT_PASSWORD=yes \
+  -e MYSQL_DATABASE=${DB_NAME} \
+  -e MYSQL_USER=${DB_USER} \
+  -e MYSQL_PASSWORD=${DB_PASS} \
+  -d mariadb:latest
 ```
 ### Volumes
 #### Data
@@ -49,13 +72,13 @@ https://hub.docker.com/_/mariadb
 
 *Note* The database pod uses an unmodified mariadb base image. Upon deployment, all configuration, including the schema is passed to the database. 
 Upload the database schema and data files to kubernetes using the following secret creation. The `schema` directory includes both the schema and data files. 
-```
+```sh
 kubectl create secret generic db-schema \
   --namespace=php-web \
-  --from-file=sakila_schema_data.sql 
+  --from-file=${PWD}/schema/sakila_schema_data.sql 
 ```
 
 Apply the manifest:
-```
+```sh
 kubectl apply -f ./php-web-deploy.yaml
 ```
