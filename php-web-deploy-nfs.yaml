@@ -1,0 +1,112 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: php-web
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-web
+  namespace: php-web
+  labels:
+    app: php-web
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: php-web
+  template:
+    metadata:
+      labels:
+        app: php-web
+    spec:
+      containers:
+        - image: pier/php-web:1.0
+          name: php-web 
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          env:
+            - name: APP_DB_SRV
+              value: "php-db.php-web.svc.cluster.local"
+            - name: APP_DB_USER
+              value: "sakila"
+            - name: APP_DB_PASS
+              value: "sakila"
+            - name: APP_DB_NAME
+              value: "sakila"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-web
+  namespace: php-web
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: php-web
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-db
+  namespace: php-web
+spec:
+  ports:
+  - name: mysql
+    port: 3306
+    protocol: TCP
+    targetPort: 3306
+  selector:
+    app: php-db
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: php-mariadb
+  namespace: php-web
+spec:
+  selector:
+    matchLabels:
+      app: php-db # has to match .spec.template.metadata.labels
+  serviceName: "php-db"
+  replicas: 1 # by default is 1
+  template:
+    metadata:
+      labels:
+        app: php-db # has to match .spec.selector.matchLabels
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: php-db
+        image: mariadb:latest
+        ports:
+        - containerPort: 3306
+          name: mysql
+        env:
+        - name: MYSQL_RANDOM_ROOT_PASSWORD
+          value: "yes"
+        - name: MYSQL_DATABASE
+          value: "sakila"
+        - name: MYSQL_USER
+          value: "sakila"
+        - name: MYSQL_PASSWORD
+          value: "sakila"
+        volumeMounts:
+        - name: db-schema
+          mountPath: /docker-entrypoint-initdb.d
+        - name: db-data
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: "db-data"
+        nfs:
+          server: docker1.pier.lan
+          path: /nfsexport/php-web
+      - name: "db-schema"
+        secret:
+          secretName: db-schema
