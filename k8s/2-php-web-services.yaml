@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-web
+  namespace: php-web
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: php-web
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-db
+  namespace: php-web
+spec:
+  ports:
+  - name: mysql
+    port: 3306
+    protocol: TCP
+    targetPort: 3306
+  type: ClusterIP
+  selector:
+    app: php-db

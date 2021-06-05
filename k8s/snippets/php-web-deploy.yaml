@@ -1,0 +1,173 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: php-web
+---
+apiVersion: v1
+kind: ConfigMap
+metadata: 
+  name: php-web-config
+  namespace: php-web
+data: 
+  app.db.srv: 'php-db.php-web.svc.cluster.local'
+  app.db.name: 'sakila'
+  app.db.user: 'sakila'
+  app.db.pass: 'sakila'
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-web
+  namespace: php-web
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: php-web
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-db
+  namespace: php-web
+spec:
+  ports:
+  - name: mysql
+    port: 3306
+    protocol: TCP
+    targetPort: 3306
+  type: ClusterIP
+  selector:
+    app: php-db
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-web
+  namespace: php-web
+  labels:
+    app: php-web
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: php-web
+  template:
+    metadata:
+      labels:
+        app: php-web
+    spec:
+      containers:
+        - image: registry.candoris.com/npier/php-web:latest
+          name: php-web 
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "128Mi"
+            limits:
+              cpu: "1000m"
+              memory: "256Mi"  
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+          env:
+            - name: APP_DB_SRV
+              valueFrom:
+                configMapKeyRef:
+                  name: php-web-config
+                  key: app.db.srv
+            - name: APP_DB_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: php-web-config
+                  key: app.db.user
+            - name: APP_DB_PASS
+              valueFrom:
+                configMapKeyRef:
+                  name: php-web-config
+                  key: app.db.pass
+            - name: APP_DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: php-web-config
+                  key: app.db.name
+---
+#kind: StorageClass
+#apiVersion: storage.k8s.io/v1
+#metadata:
+#  name: default
+#  namespace: default
+#  annotations:
+#    storageclass.kubernetes.io/is-default-class: "true"
+#provisioner: csi.vsphere.vmware.com
+#parameters:
+#  storagepolicyname: "k8s"
+#---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: php-db
+  namespace: php-web
+spec:
+  selector:
+    matchLabels:
+      app: php-db # has to match .spec.template.metadata.labels
+  serviceName: "php-db"
+  replicas: 1 # by default is 1
+  template:
+    metadata:
+      labels:
+        app: php-db # has to match .spec.selector.matchLabels
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: php-db
+        image: mariadb:stable
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "128Mi"
+          limits:
+            cpu: "1000m"
+            memory: "256Mi"  
+        ports:
+        - containerPort: 3306
+          name: mysql
+        env:
+        - name: MYSQL_RANDOM_ROOT_PASSWORD
+          value: "yes"
+        - name: MYSQL_DATABASE
+          configMapKeyRef:
+            name: php-web-config
+            key: app.db.name
+        - name: MYSQL_USER
+          configMapKeyRef:
+            name: php-web-config
+            key: app.db.user
+        - name: MYSQL_PASSWORD
+          configMapKeyRef:
+            name: php-web-config
+            key: app.db.pass
+        volumeMounts:
+        - name: db-schema
+          mountPath: /docker-entrypoint-initdb.d
+        - name: db-data
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: "db-schema"
+        secret: 
+          secretName: db-schema
+  volumeClaimTemplates:
+  - metadata:
+      name: db-data
+      annotations:
+        volume.beta.kubernetes.io/storage-class: "default" # Your storage class goes here
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi

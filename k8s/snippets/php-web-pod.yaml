@@ -7,7 +7,7 @@ metadata:
     app: php-web
 spec:
   containers:
-  - image: pier/php-web:1.0
+  - image: registry.candoris.com/npier/php-web:latest
     name: php-web 
     ports:
     - containerPort: 80

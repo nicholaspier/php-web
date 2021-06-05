@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: 
+  name: php-web-config
+  namespace: php-web
+data: 
+  app.db.srv: 'php-db.php-web.svc.cluster.local'
+  app.db.name: 'sakila'
+  app.db.user: 'sakila'
+  app.db.pass: 'sakila'
