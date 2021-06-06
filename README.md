@@ -71,14 +71,10 @@ https://hub.docker.com/_/mariadb
 # Kubernetes
 
 *Note* The database pod uses an unmodified mariadb base image. Upon deployment, all configuration, including the schema is passed to the database. 
-Upload the database schema and data files to kubernetes using the following secret creation. The `schema` directory includes both the schema and data files. 
-```sh
-kubectl create secret generic db-schema \
-  --namespace=php-web \
-  --from-file=${PWD}/schema/sakila_schema_data.sql 
-```
 
-Apply the manifest:
+First, modify the configMap to meet your needs. Database names and logins are customizable. 
+
+Apply the manifests in the k8s directory:
 ```sh
-kubectl apply -f ./php-web-deploy.yaml
+kubectl apply -f ./k8s
 ```

@@ -60,7 +60,7 @@ spec:
       name: db-data
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: "standard"
+      storageClassName: "not-my-storageclass" # Update this to match your environment
       resources:
         requests:
           storage: 1Gi
