@@ -4,11 +4,13 @@ metadata:
   name: php-web
   namespace: php-web
 spec:
+  type: NodePort
   ports:
   - name: http
     port: 80
     protocol: TCP
     targetPort: 80
+    nodePort: 32088
   selector:
     app: php-web
 ---
