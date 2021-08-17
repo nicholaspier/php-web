@@ -4,7 +4,8 @@ metadata:
   name: php-web-config
   namespace: php-web
 data: 
-  app.db.srv: 'php-db.php-web.svc.cluster.local'
-  app.db.name: 'sakila'
-  app.db.user: 'sakila'
-  app.db.pass: 'UseAStrongerPassword'
+  MYSQL_HOST: 'db'
+  MYSQL_DATABASE: 'sakila'
+  MYSQL_USER: 'sakila'
+  MYSQL_PASSWORD: 'UseAStrongerPassword'
+  MYSQL_RANDOM_ROOT_PASSWORD: 'yes'

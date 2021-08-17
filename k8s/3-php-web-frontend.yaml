@@ -1,27 +1,28 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: php-web
+  name: frontend
   namespace: php-web
   labels:
-    app: php-web
+    app: frontend
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
-      app: php-web
+      app: frontend
   template:
     metadata:
       labels:
-        app: php-web
+        app: frontend
     spec:
       containers:
         - image: registry.candoris.com/npier/php-web:latest
-          name: php-web 
+          name: frontend 
+          imagePullPolicy: Always
           resources:
             requests:
-              cpu: "500m"
-              memory: "128Mi"
+              cpu: "250m"
+              memory: "64Mi"
             limits:
               cpu: "1000m"
               memory: "256Mi"  
@@ -29,24 +30,6 @@ spec:
             - containerPort: 80
               name: http
               protocol: TCP
-          env:
-            - name: APP_DB_SRV
-              valueFrom:
-                configMapKeyRef:
-                  name: php-web-config
-                  key: app.db.srv
-            - name: APP_DB_USER
-              valueFrom:
-                configMapKeyRef:
-                  name: php-web-config
-                  key: app.db.user
-            - name: APP_DB_PASS
-              valueFrom:
-                configMapKeyRef:
-                  name: php-web-config
-                  key: app.db.pass
-            - name: APP_DB_NAME
-              valueFrom:
-                configMapKeyRef:
-                  name: php-web-config
-                  key: app.db.name
+          envFrom:
+          - configMapRef:
+              name: php-web-config

@@ -1,51 +1,36 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: php-db
+  name: db
   namespace: php-web
 spec:
   selector:
     matchLabels:
-      app: php-db # has to match .spec.template.metadata.labels
-  serviceName: "php-db"
+      app: db # has to match .spec.template.metadata.labels
+  serviceName: "db"
   replicas: 1 # by default is 1
   template:
     metadata:
       labels:
-        app: php-db # has to match .spec.selector.matchLabels
+        app: db # has to match .spec.selector.matchLabels
     spec:
       terminationGracePeriodSeconds: 10
       containers:
-      - name: php-db
+      - name: db
         image: mariadb:latest
         resources:
           requests:
-            cpu: "500m"
-            memory: "128Mi"
+            cpu: "250m"
+            memory: "64Mi"
           limits:
             cpu: "1000m"
             memory: "256Mi"  
         ports:
         - containerPort: 3306
           name: mysql
-        env:
-        - name: MYSQL_RANDOM_ROOT_PASSWORD
-          value: "yes"
-        - name: MYSQL_DATABASE
-          valueFrom:
-            configMapKeyRef:
-              name: php-web-config
-              key: app.db.name
-        - name: MYSQL_USER
-          valueFrom:
-            configMapKeyRef:
-              name: php-web-config
-              key: app.db.user
-        - name: MYSQL_PASSWORD
-          valueFrom:
-            configMapKeyRef:
-              name: php-web-config
-              key: app.db.pass
+        envFrom:
+        - configMapRef:
+            name: php-web-config
         volumeMounts:
         - name: db-schema
           mountPath: /docker-entrypoint-initdb.d
@@ -60,7 +45,7 @@ spec:
       name: db-data
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: "default" # Update this to match your environment
+#      storageClassName: tanzu
       resources:
         requests:
           storage: 1Gi

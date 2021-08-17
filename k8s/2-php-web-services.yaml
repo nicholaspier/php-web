@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: php-web
+  name: frontend
   namespace: php-web
 spec:
   type: NodePort
@@ -12,12 +12,12 @@ spec:
     targetPort: 80
     nodePort: 32088
   selector:
-    app: php-web
+    app: frontend
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: php-db
+  name: db
   namespace: php-web
 spec:
   ports:
@@ -27,4 +27,4 @@ spec:
     targetPort: 3306
   type: ClusterIP
   selector:
-    app: php-db
+    app: db

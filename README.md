@@ -9,25 +9,25 @@ The database is part of a separate image detailed below.
 ### Example run. 
 
 ```sh
-DB_HOST=<IP or Hostname>
-DB_USER=sakila
-DB_PASS=sakila
-DB_NAME=sakila
+MYSQL_HOST=<IP or Hostname>
+MYSQL_USER=sakila
+MYSQL_PASSWORD=sakila
+MYSQL_DATABASE=sakila
 
 docker run -dit -p 8080:80 \
-  -e APP_DB_SRV="${DB_HOST}" \
-  -e APP_DB_USER="${DB_USER}" \
-  -e APP_DB_PASS="${DB_PASS}" \
-  -e APP_DB_NAME="${DB_NAME}" \
+  -e MYSQL_HOST"${MYSQL_HOST}" \
+  -e MYSQL_USER="${MYSQL_USER}" \
+  -e MYSQL_PASSWORD="${MYSQL_PASSWORD}" \
+  -e MYSQL_DATABASE="${MYSQL_DATABASE}" \
   --name php-web \
   pier/php-web
 ```
 
 ### Variables
-* ```APP_DB_SRV``` - The IP or hostname of the dabase server. 
-* ```APP_DB_USER``` - Database user credential 
-* ```APP_DB_PASS``` - Database user Password
-* ```APP_DB_NAME``` - Database name with schema for application. 
+* ```DB_SRV``` - The IP or hostname of the dabase server. 
+* ```MYSQL_USER``` - Database user credential 
+* ```MYSQL_PASSWORD``` - Database user Password
+* ```MYSQL_DATABASE``` - Database name with schema for application. 
 
 	
 # Database
@@ -35,18 +35,18 @@ This isn't a custom image. Instead, we leverage the public mariadb image and pas
 
 You can run the database with the following example run command:
 ```sh
-DB_USER=sakila
-DB_PASS=sakila
-DB_NAME=sakila
+MYSQL_USER=sakila
+MYSQL_PASSWORD=sakila
+MYSQL_DATABASE=sakila
 
 docker run -dit --name php-db \
   -p 3306:3306 \
   -v ${PWD}/db-data/:/var/lib/mysql \
   -v ${PWD}/schema:/docker-entrypoint-initdb.d  \
   -e MYSQL_RANDOM_ROOT_PASSWORD=yes \
-  -e MYSQL_DATABASE=${DB_NAME} \
-  -e MYSQL_USER=${DB_USER} \
-  -e MYSQL_PASSWORD=${DB_PASS} \
+  -e MYSQL_DATABASE=${MYSQL_DATABASE} \
+  -e MYSQL_USER=${MYSQL_USER} \
+  -e MYSQL_PASSWORD=${MYSQL_PASSWORD} \
   -d mariadb:latest
 ```
 ### Volumes

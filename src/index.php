@@ -67,7 +67,7 @@
                       <?php
                       // boolean for tracking if we have the required env variables
                       $env_check = 1;
-                      if (!isset($_ENV["APP_DB_SRV"], $_ENV["APP_DB_USER"], $_ENV["APP_DB_PASS"], $_ENV["APP_DB_NAME"])) {
+                      if (!isset($_ENV["MYSQL_HOST"], $_ENV["MYSQL_USER"], $_ENV["MYSQL_PASSWORD"], $_ENV["MYSQL_DATABASE"])) {
                         echo '<div class="alert alert-danger" role="alert">'."Make sure to set the DB environment variables.</div>";
                         // set env_check to 0 to affect future if statements
                         $env_check = 0;
@@ -108,7 +108,7 @@
                     $conn_check = 1;
 
                     if ($env_check) {
-                      $conn = new mysqli($_ENV["APP_DB_SRV"], $_ENV["APP_DB_USER"], $_ENV["APP_DB_PASS"], $_ENV["APP_DB_NAME"], 3306);
+                      $conn = new mysqli($_ENV["MYSQL_HOST"], $_ENV["MYSQL_USER"], $_ENV["MYSQL_PASSWORD"], $_ENV["MYSQL_DATABASE"], 3306);
 
                       // Check connection
                       if ($conn->connect_error) {
