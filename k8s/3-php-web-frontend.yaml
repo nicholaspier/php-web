@@ -16,7 +16,7 @@ spec:
         app: frontend
     spec:
       containers:
-        - image: registry.candoris.com/npier/php-web:latest
+        - image: cdik8sworkshop.azurecr.io/php-web:latest
           name: frontend 
           imagePullPolicy: Always
           resources:
